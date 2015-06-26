@@ -1,9 +1,10 @@
 {
   "name": "mycrawl",
-  "version": "0.0.4",
+  "version": "0.1.1",
   "description": "craw a definite web",
   "main": "index.js",
   "directories": {
+    "doc": "doc",
     "test": "test"
   },
   "dependencies": {
@@ -15,12 +16,9 @@
   "scripts": {
     "test": "node index"
   },
-  "author": {
-    "name": "lzk"
-  },
+  "author": "lzk",
   "license": "ISC",
-  "_id": "mycrawl@0.0.3",
-  "_shasum": "9680c59f4d4630b9d6dd75691629ef1e9a592cb1",
+  "_shasum": "84a92dff3f3058545035cc6d7a3982feac5dabc8",
   "_from": "mycrawl@*",
   "_npmVersion": "2.10.1",
   "_nodeVersion": "0.12.4",
@@ -33,11 +31,15 @@
     "tarball": "http://registry.npmjs.org/mycrawl/-/mycrawl-0.0.3.tgz"
   },
   "maintainers": [
-    {
-      "name": "zunkun",
-      "email": "liuzk552@gmail.com"
-    }
+    "zunkun <liuzk552@gmail.com>"
   ],
   "_resolved": "https://registry.npmjs.org/mycrawl/-/mycrawl-0.0.3.tgz",
-  "readme": "ERROR: No README data found!"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zunkun/mycrawl.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zunkun/mycrawl/issues"
+  },
+  "homepage": "https://github.com/zunkun/mycrawl#readme"
 }

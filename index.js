@@ -1,8 +1,11 @@
 var Registration = require('./lib/registration').Registration;
+var CompanyName = require('./lib/companyname').CompanyName;
+var RegistrationFeedback = require('./lib/registrationFeedback').RegistrationFeedback;
 
 var Util = require('./lib/util').Util;
-
 var util = new Util();
+
+
 var cheerio = require('cheerio');
 var async = require('async');
 
@@ -25,15 +28,6 @@ exports.Crawler = Crawler;
 //---------------------------------------------------
 
 
-// function verifyKeywords(keywords) {
-//   log(keywords, typeof keywords)
-//   if(typeof keywords === 'string' && keywords.length >= 4) {
-//     return true;
-//   } else {
-//     return false;
-//   }
-// }
-
 function handleKeywords(keywords, zone) {
   var keywordsLength = keywords.length;
 
@@ -42,7 +36,7 @@ function handleKeywords(keywords, zone) {
 
     if(keywords.indexOf(zone) >= 0) {
       if(keywordsLength >= 4) {
-        return {flag: true, searchKeywords: keywords};
+        return {flag: true, searchKeywords: [keywords]};
       } else {
         return {flag: false, searchKeywords: []};
       }
@@ -56,94 +50,229 @@ function handleKeywords(keywords, zone) {
   }
 }
 
+//---------------------------------------------------
 
 
-
-
-Crawler.searchCompanyInformation = function(options, keywords, callback) {
-
+Crawler.prototype.searchCompanyInformation = function(options, keywords, callback) {
   var zone = '上海';
-
   var keywordsResults = handleKeywords(keywords, zone);
   var flag = keywordsResults.flag;
   var searchKeywords = keywordsResults.searchKeywords;
+  
+  log(zone, keywords, keywordsResults, searchKeywords)
 
-  if(flag !== false) {
+  // var companyInformation ;
 
-    var self = this;
+  if(flag) {
+    // var self = this;
     var registration = new Registration(options);
-    var detailResultsOutput = [];
+    var detailResultsOutputs = []; 
+    var companyListsOutputs = [];   
+    var number = 0;
+    var allpageNo = 0;
+    async.each(searchKeywords, function(searchKeyword, done) {
 
-    async.each(searchKeywords, function(searchKeyword, finish) {
-      var keyword = searchKeyword;
-      
-      registration.getRegistrationLists(keyword, function(err, body) {
+      registration.getRegistrationLists(searchKeyword, function(err, body) {
         if(err) {
           log('error: ', err);
-          callback(err, {numberOfResults: 0, detailResultsOutput: null });
+          done(err);
         } else {
-          util.handleCompanyLists(body, function(companyResults) {
-          
-            // registration.getRegistrationDetail 
+          util.handleCompanyLists(body, function(companyResults){
             var companyLists = companyResults.companyLists;
             var numberOfResults = companyResults.numberOfResults;
+            
+            allpageNo += parseInt(companyResults.allpageNo);            
 
-            if(companyLists.length !== 0) {
-              async.each(companyLists, function(companyList, done) {
-                var companyRegistrationId = companyList.companyRegistrationId;
+            number += parseInt(numberOfResults);
 
-                registration.getRegistrationDetail(companyRegistrationId, function(err, companyDetailHtml) {
-                  if(err) {
-                    // log('get detail err', err);
-                    done(err);
-                  } else {
-                    util.handleCompanyDetail(companyDetailHtml, function(detailResults) {
-                      // log(detailResults)
-                      
-                      detailResultsOutput.push({company: companyList, detailInformation: detailResults});
-                      done();
-                    })
+            companyLists.forEach(function(companyList) {
+              
+            companyListsOutputs.push(companyList);
+            })
+            // log(companyLists)
+            done();
+          })
+        }
+      })
+
+    }, function(err) {
+        if(err) {
+          log(err);
+          callback(err, {allpageNo: 0, numberOfResults: 0, detailResultsOutputs: null }); 
+        } else {
+        
+          log('succeed get companyLists', number, companyListsOutputs);
+          // callback(null, {numberOfResults: number, companyListsOutputs: companyListsOutputs})
+          // var companyLists = com
+          var companyLists = companyListsOutputs;
+          async.each(companyLists, function(companyList, done) {
+            var companyQueryId = companyList.companyQueryId;
+            registration.getRegistrationDetail(companyQueryId, function(err, companyDetailHtml) {
+              if(err) {
+                done(err);
+              } else {
+                 util.handleCompanyDetail(companyDetailHtml, function(detailResults) {
+
+                  var companyOutput = {
+                    company: companyList,
+                    basicDetail: detailResults.basicDetail,
+                    annualCheckDetail: detailResults.annualCheckDetail
                   }
-                });   
-              }, function(err) {
-                if(err) {
-                  log('get detail err: ', err);
-                  callback(err, {numberOfResults: numberOfResults, detailResultsOutput: null });
-                } else {
-                  // log('Details: ', detailResultsOutput);
-                  callback(null, {numberOfResults: numberOfResults, detailResultsOutput: detailResultsOutput })
-                }
-              });
-
+                  detailResultsOutputs.push(companyOutput);
+                  done();
+                 });
+              }
+            })       
+          }, function(err) {
+            if(err) {
+              log(err);
+              callback(err, {allpageNo: 0,numberOfResults: 0, detailResultsOutputs: null });                  
             } else {
-              callback(null, {numberOfResults: 0, detailResultsOutput: null });
+              callback(null, {allpageNo: allpageNo, numberOfResults: number, detailResultsOutputs: detailResultsOutputs})
+
             }
-            });
-          };
-        })
-      
+          })
+        }
 
+      })
 
-    })
+  }else {
 
-
-
-
-  } else {
-
-     var err = '关键词输入不合法';
-    callback(err, {numberOfResults: 0, detailResultsOutput: null });   
-
+    var err = '关键词输入不合法';
+    callback(err, {allpageNo: 0, numberOfResults: 0, detailResultsOutputs: null });     
   }
+}
 
+//---------------------------------------------------
+// Get more registrations with pageno
+
+Crawler.prototype.getMoreRegistrations = function(options, keywords, allpageNo, pageNo, callback) {
+  var zone = '上海';
+  var keywordsResults = handleKeywords(keywords, zone);
+  var flag = keywordsResults.flag;
+  var searchKeywords = keywordsResults.searchKeywords;
+  
+  log(zone, keywords, keywordsResults, searchKeywords)
+
+  // var companyInformation ;
+
+  if(flag) {
+    // var self = this;
+    var registration = new Registration(options);
+    var detailResultsOutputs = []; 
+    var companyListsOutputs = [];   
+    var number = 0;
+    async.each(searchKeywords, function(searchKeyword, done) {
+
+      registration.getMoreRegistrationsBasedNo(allpageNo, pageNo, searchKeyword, function(err, body) {
+        if(err) {
+          log('error: ', err);
+          done(err);
+        } else {
+          util.handleCompanyLists(body, function(companyResults){
+            var companyLists = companyResults.companyLists;
+            var numberOfResults = companyResults.numberOfResults;            
+
+            number += parseInt(numberOfResults);
+
+            companyLists.forEach(function(companyList) {
+              
+            companyListsOutputs.push(companyList);
+            })
+            // log(companyLists)
+            done();
+          })
+        }
+      })
+
+    }, function(err) {
+        if(err) {
+          log(err);
+          callback(err, {numberOfResults: 0, detailResultsOutputs: null }); 
+        } else {
+        
+          log('succeed get companyLists', number, companyListsOutputs);
+
+          var companyLists = companyListsOutputs;
+          async.each(companyLists, function(companyList, done) {
+            var companyQueryId = companyList.companyQueryId;
+            registration.getRegistrationDetail(companyQueryId, function(err, companyDetailHtml) {
+              if(err) {
+                done(err);
+              } else {
+                 util.handleCompanyDetail(companyDetailHtml, function(detailResults) {
+
+                  var companyOutput = {
+                    company: companyList,
+                    basicDetail: detailResults.basicDetail,
+                    annualCheckDetail: detailResults.annualCheckDetail
+                  }
+                  detailResultsOutputs.push(companyOutput);
+                  done();
+                 });
+              }
+            })       
+          }, function(err) {
+            if(err) {
+              log(err);
+              callback(err, {numberOfResults: 0, detailResultsOutputs: null });                  
+            } else {
+              callback(null, {numberOfResults: number, detailResultsOutputs: detailResultsOutputs})
+
+            }
+          })
+        }
+
+      })
+
+  }else {
+
+    var err = '关键词输入不合法';
+    callback(err, {numberOfResults: 0, detailResultsOutputs: null });     
+  }
 }
 
 
 
 
 
+//---------------------------------------------------
 
 
+Crawler.prototype.searchCompanyNameStatus = function(options, keywords, callback) {
+
+  log(options, keywords)
+  keywords = keywords || "";
+  var companyName = new CompanyName(options);
+
+  companyName.getCompanyNameStatus(keywords, function(err, body) {
+    if(err) {
+      callback(err, null);
+    } else {
+    util.handleCompanyNameStatusPrecisily(body, function(companyNameStatusInfo) {
+      callback(null, companyNameStatusInfo);
+    });      
+    }
+  })
+}
+
+//---------------------------------------------------
+
+Crawler.prototype.searchRegistrationStatus = function(options, keywords, callback) {
+
+  log(options, keywords)
+  var registrationFeedback = new RegistrationFeedback(options);
+
+  registrationFeedback.getRegistrationStatus(keywords, function(err, body) {
+    if(err) {
+      callback(err, null);
+    } else {
+    util.handleRegistrationStatusFeedback(body, function(registrationStatusInfo) {
+      callback(null, registrationStatusInfo);
+    });      
+    }
+  })
+}
 
 
-
+//---------------------------------------------------
