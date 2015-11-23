@@ -78,22 +78,36 @@ fs.readFile('./company.html', function(err, data) {
     var propertiesLength = properties.length;
     var valueInfos = html.find("tr.page-item"); // 属性值
     var valueInfosLength = valueInfos.length;
-    console.log(propertiesLength, valueInfosLength)
 
     var result = [];
-    for (var i = 0; i < propertiesLength; i++) {
-      var property = $(properties[i]).text().replace(/\n|\r|\t/g, "").trim();
-      for (var j = 0; j < valueInfosLength; j++) {
-        var td = $(valueInfos[j]).find("td")[i];
+    for (var i = 0; i < valueInfosLength; i++) {
+      var temResult = [];
+      for (var j = 0; j < propertiesLength; j++) {
+        var property = $(properties[j]).text().replace(/\n|\r|\t/g, "").trim();
+        var td = $(valueInfos[i]).find("td")[j];
         var value = $(td).text().replace(/\n|\r|\t/g, "").trim();
-        result.push({
+        var detail = $(td).find("a").first().text().replace(/\n|\r|\t/g, "").trim();
+
+        // 判断是否有股东详情
+        var type = "text"
+        var url = "";
+        if (detail === '详情') {
+          type = 'url';
+          url = $(td).find("a").first().attr("href").replace("https", "http");
+        }
+
+        temResult.push({
           key: property,
-          value: value
+          value: value,
+          type: type,
+          url: url
         })
       }
+      result.push(temResult)
     };
     return result;
   };
+
 
   // 获取变更信息
 
@@ -104,7 +118,71 @@ fs.readFile('./company.html', function(err, data) {
   var RevocationInfoHtml = $("#alterTable").eq(1);
   var revocationInfos = InfoLists(RevocationInfoHtml);
 
+  var registrationInfo = {
+    basicInfo: basicInfo,
+    investors: investors,
+    changeInfos: changeInfos,
+    revocationInfos: revocationInfos
+  };
+
+  // log(registrationInfo)
+  // return registrationInfo;
+  //---------------------------------------------------------------
+  // 下面的是备案信息
+  var memberObj = $("#memberTable");
+  var tds = memberObj.find(".page-item :not('.center')");
+  var tdsLength = tds.length;
+
+  var memberTable = [];
+  var memberLength = tdsLength / 2;
+
+  for (var i = 0; i < memberLength; i++) {
+    var member = [];
+    for (var j = 2 * i; j < 2 * (i + 1); j++) {
+      if (j % 2 === 0) {
+        var key = "姓名";
+        var value = $(tds[j]).text().replace(/\n|\r|\t/g, "").trim();
+      } else {
+        var key = '职务';
+        var value = $(tds[j]).text().replace(/\n|\r|\t/g, "").trim();
+      }
+      member.push({
+        key: key,
+        value: value
+      });
+    }
+    memberTable.push(member)
+  }
+
+  var branchObj = $("#branchTable")
+
+  var branchTable = InfoLists(branchObj);
+
+  var recordInfo = {
+    memberTable: memberTable,
+    branchTable: branchTable
+  };
+
+  // 动产抵押登记信息
+  mortageObj = $("#mortageTable");
+  var mortageTable = InfoLists(mortageObj);
 
 
+  // 行政处罚信息
+  var punishObj = $("#punishTable");
+  var punishTable = InfoLists(punishObj);
+
+  // 经营异常信息
+  var exceptObj = $("#exceptTable");
+  var exceptTable = InfoLists(exceptObj);
+
+  // 严重违法信息
+  var blackObj = $("#blackTable");
+  var blackTable = InfoLists(blackObj);
+
+
+  // 抽查检查信息
+  var spotcheckObj = $("#spotcheckTable");
+  var spotcheckTable = InfoLists(spotcheckObj);
 
 })

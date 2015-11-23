@@ -1,6 +1,7 @@
 var Registration = require('./lib/registration').Registration;
 var CompanyName = require('./lib/companyname').CompanyName;
 var RegistrationFeedback = require('./lib/registrationFeedback').RegistrationFeedback;
+var Credit = require('./lib/credit').Credit;
 
 var Util = require('./lib/util').Util;
 var util = new Util();
@@ -14,7 +15,7 @@ var async = require('async');
 function log(info) {
   console.log('------------------------------------------------------------')
   var len = arguments.length;
-  for(var i =0; i < len; i++) {
+  for (var i = 0; i < len; i++) {
     console.log(arguments[i]);
   }
 }
@@ -31,21 +32,33 @@ exports.Crawler = Crawler;
 function handleKeywords(keywords, zone) {
   var keywordsLength = keywords.length;
 
-  if(typeof keywords === 'string' && keywordsLength >= 2) {
-     zone = zone || '上海'; // we only use this for shanghai province , china
+  if (typeof keywords === 'string' && keywordsLength >= 2) {
+    zone = zone || '上海'; // we only use this for shanghai province , china
 
-    if(keywords.indexOf(zone) >= 0) {
-      if(keywordsLength >= 4) {
-        return {flag: true, searchKeywords: [keywords]};
+    if (keywords.indexOf(zone) >= 0) {
+      if (keywordsLength >= 4) {
+        return {
+          flag: true,
+          searchKeywords: [keywords]
+        };
       } else {
-        return {flag: false, searchKeywords: []};
+        return {
+          flag: false,
+          searchKeywords: []
+        };
       }
     } else {
       searchKeywords = [zone + keywords, keywords + '（' + zone + '）'];
-      return {flag: true, searchKeywords: searchKeywords}
+      return {
+        flag: true,
+        searchKeywords: searchKeywords
+      }
     }
   } else {
-    return {flag: false, searchKeywords: []}
+    return {
+      flag: false,
+      searchKeywords: []
+    }
 
   }
 }
@@ -58,36 +71,36 @@ Crawler.prototype.searchCompanyInformation = function(options, keywords, callbac
   var keywordsResults = handleKeywords(keywords, zone);
   var flag = keywordsResults.flag;
   var searchKeywords = keywordsResults.searchKeywords;
-  
+
   log(zone, keywords, keywordsResults, searchKeywords)
 
   // var companyInformation ;
 
-  if(flag) {
+  if (flag) {
     // var self = this;
     var registration = new Registration(options);
-    var detailResultsOutputs = []; 
-    var companyListsOutputs = [];   
+    var detailResultsOutputs = [];
+    var companyListsOutputs = [];
     var number = 0;
     var allpageNo = 0;
     async.each(searchKeywords, function(searchKeyword, done) {
 
       registration.getRegistrationLists(searchKeyword, function(err, body) {
-        if(err) {
+        if (err) {
           log('error: ', err);
           done(err);
         } else {
-          util.handleCompanyLists(body, function(companyResults){
+          util.handleCompanyLists(body, function(companyResults) {
             var companyLists = companyResults.companyLists;
             var numberOfResults = companyResults.numberOfResults;
-            
-            allpageNo += parseInt(companyResults.allpageNo);            
+
+            allpageNo += parseInt(companyResults.allpageNo);
 
             number += parseInt(numberOfResults);
 
             companyLists.forEach(function(companyList) {
-              
-            companyListsOutputs.push(companyList);
+
+              companyListsOutputs.push(companyList);
             })
             // log(companyLists)
             done();
@@ -96,50 +109,66 @@ Crawler.prototype.searchCompanyInformation = function(options, keywords, callbac
       })
 
     }, function(err) {
-        if(err) {
-          log(err);
-          callback(err, {allpageNo: 0, numberOfResults: 0, detailResultsOutputs: null }); 
-        } else {
-        
-          log('succeed get companyLists', number, companyListsOutputs);
-          // callback(null, {numberOfResults: number, companyListsOutputs: companyListsOutputs})
-          // var companyLists = com
-          var companyLists = companyListsOutputs;
-          async.each(companyLists, function(companyList, done) {
-            var companyQueryId = companyList.companyQueryId;
-            registration.getRegistrationDetail(companyQueryId, function(err, companyDetailHtml) {
-              if(err) {
-                done(err);
-              } else {
-                 util.handleCompanyDetail(companyDetailHtml, function(detailResults) {
+      if (err) {
+        log(err);
+        callback(err, {
+          allpageNo: 0,
+          numberOfResults: 0,
+          detailResultsOutputs: null
+        });
+      } else {
 
-                  var companyOutput = {
-                    company: companyList,
-                    basicDetail: detailResults.basicDetail,
-                    annualCheckDetail: detailResults.annualCheckDetail
-                  }
-                  detailResultsOutputs.push(companyOutput);
-                  done();
-                 });
-              }
-            })       
-          }, function(err) {
-            if(err) {
-              log(err);
-              callback(err, {allpageNo: 0,numberOfResults: 0, detailResultsOutputs: null });                  
+        log('succeed get companyLists', number, companyListsOutputs);
+        // callback(null, {numberOfResults: number, companyListsOutputs: companyListsOutputs})
+        // var companyLists = com
+        var companyLists = companyListsOutputs;
+        async.each(companyLists, function(companyList, done) {
+          var companyQueryId = companyList.companyQueryId;
+          registration.getRegistrationDetail(companyQueryId, function(err, companyDetailHtml) {
+            if (err) {
+              done(err);
             } else {
-              callback(null, {allpageNo: allpageNo, numberOfResults: number, detailResultsOutputs: detailResultsOutputs})
+              util.handleCompanyDetail(companyDetailHtml, function(detailResults) {
 
+                var companyOutput = {
+                  company: companyList,
+                  basicDetail: detailResults.basicDetail,
+                  annualCheckDetail: detailResults.annualCheckDetail
+                }
+                detailResultsOutputs.push(companyOutput);
+                done();
+              });
             }
           })
-        }
+        }, function(err) {
+          if (err) {
+            log(err);
+            callback(err, {
+              allpageNo: 0,
+              numberOfResults: 0,
+              detailResultsOutputs: null
+            });
+          } else {
+            callback(null, {
+              allpageNo: allpageNo,
+              numberOfResults: number,
+              detailResultsOutputs: detailResultsOutputs
+            })
 
-      })
+          }
+        })
+      }
 
-  }else {
+    })
+
+  } else {
 
     var err = '关键词输入不合法';
-    callback(err, {allpageNo: 0, numberOfResults: 0, detailResultsOutputs: null });     
+    callback(err, {
+      allpageNo: 0,
+      numberOfResults: 0,
+      detailResultsOutputs: null
+    });
   }
 }
 
@@ -151,33 +180,33 @@ Crawler.prototype.getMoreRegistrations = function(options, keywords, allpageNo, 
   var keywordsResults = handleKeywords(keywords, zone);
   var flag = keywordsResults.flag;
   var searchKeywords = keywordsResults.searchKeywords;
-  
+
   log(zone, keywords, keywordsResults, searchKeywords)
 
   // var companyInformation ;
 
-  if(flag) {
+  if (flag) {
     // var self = this;
     var registration = new Registration(options);
-    var detailResultsOutputs = []; 
-    var companyListsOutputs = [];   
+    var detailResultsOutputs = [];
+    var companyListsOutputs = [];
     var number = 0;
     async.each(searchKeywords, function(searchKeyword, done) {
 
       registration.getMoreRegistrationsBasedNo(allpageNo, pageNo, searchKeyword, function(err, body) {
-        if(err) {
+        if (err) {
           log('error: ', err);
           done(err);
         } else {
-          util.handleCompanyLists(body, function(companyResults){
+          util.handleCompanyLists(body, function(companyResults) {
             var companyLists = companyResults.companyLists;
-            var numberOfResults = companyResults.numberOfResults;            
+            var numberOfResults = companyResults.numberOfResults;
 
             number += parseInt(numberOfResults);
 
             companyLists.forEach(function(companyList) {
-              
-            companyListsOutputs.push(companyList);
+
+              companyListsOutputs.push(companyList);
             })
             // log(companyLists)
             done();
@@ -186,49 +215,61 @@ Crawler.prototype.getMoreRegistrations = function(options, keywords, allpageNo, 
       })
 
     }, function(err) {
-        if(err) {
-          log(err);
-          callback(err, {numberOfResults: 0, detailResultsOutputs: null }); 
-        } else {
-        
-          log('succeed get companyLists', number, companyListsOutputs);
+      if (err) {
+        log(err);
+        callback(err, {
+          numberOfResults: 0,
+          detailResultsOutputs: null
+        });
+      } else {
 
-          var companyLists = companyListsOutputs;
-          async.each(companyLists, function(companyList, done) {
-            var companyQueryId = companyList.companyQueryId;
-            registration.getRegistrationDetail(companyQueryId, function(err, companyDetailHtml) {
-              if(err) {
-                done(err);
-              } else {
-                 util.handleCompanyDetail(companyDetailHtml, function(detailResults) {
+        log('succeed get companyLists', number, companyListsOutputs);
 
-                  var companyOutput = {
-                    company: companyList,
-                    basicDetail: detailResults.basicDetail,
-                    annualCheckDetail: detailResults.annualCheckDetail
-                  }
-                  detailResultsOutputs.push(companyOutput);
-                  done();
-                 });
-              }
-            })       
-          }, function(err) {
-            if(err) {
-              log(err);
-              callback(err, {numberOfResults: 0, detailResultsOutputs: null });                  
+        var companyLists = companyListsOutputs;
+        async.each(companyLists, function(companyList, done) {
+          var companyQueryId = companyList.companyQueryId;
+          registration.getRegistrationDetail(companyQueryId, function(err, companyDetailHtml) {
+            if (err) {
+              done(err);
             } else {
-              callback(null, {numberOfResults: number, detailResultsOutputs: detailResultsOutputs})
+              util.handleCompanyDetail(companyDetailHtml, function(detailResults) {
 
+                var companyOutput = {
+                  company: companyList,
+                  basicDetail: detailResults.basicDetail,
+                  annualCheckDetail: detailResults.annualCheckDetail
+                }
+                detailResultsOutputs.push(companyOutput);
+                done();
+              });
             }
           })
-        }
+        }, function(err) {
+          if (err) {
+            log(err);
+            callback(err, {
+              numberOfResults: 0,
+              detailResultsOutputs: null
+            });
+          } else {
+            callback(null, {
+              numberOfResults: number,
+              detailResultsOutputs: detailResultsOutputs
+            })
 
-      })
+          }
+        })
+      }
 
-  }else {
+    })
+
+  } else {
 
     var err = '关键词输入不合法';
-    callback(err, {numberOfResults: 0, detailResultsOutputs: null });     
+    callback(err, {
+      numberOfResults: 0,
+      detailResultsOutputs: null
+    });
   }
 }
 
@@ -246,12 +287,12 @@ Crawler.prototype.searchCompanyNameStatus = function(options, keywords, callback
   var companyName = new CompanyName(options);
 
   companyName.getCompanyNameStatus(keywords, function(err, body) {
-    if(err) {
+    if (err) {
       callback(err, null);
     } else {
-    util.handleCompanyNameStatusPrecisily(body, function(companyNameStatusInfo) {
-      callback(null, companyNameStatusInfo);
-    });      
+      util.handleCompanyNameStatusPrecisily(body, function(companyNameStatusInfo) {
+        callback(null, companyNameStatusInfo);
+      });
     }
   })
 }
@@ -264,15 +305,77 @@ Crawler.prototype.searchRegistrationStatus = function(options, keywords, callbac
   var registrationFeedback = new RegistrationFeedback(options);
 
   registrationFeedback.getRegistrationStatus(keywords, function(err, body) {
-    if(err) {
+    if (err) {
       callback(err, null);
     } else {
-    util.handleRegistrationStatusFeedback(body, function(registrationStatusInfo) {
-      callback(null, registrationStatusInfo);
-    });      
+      util.handleRegistrationStatusFeedback(body, function(registrationStatusInfo) {
+        callback(null, registrationStatusInfo);
+      });
     }
   })
 }
+
+
+//---------------------------------------------------
+
+Crawler.prototype.getRegistrationDisclosure = function(options, callback) {
+  if (!options || !options.keyword) {
+    log("getRegistrationDisclosure failed", options);
+    callback(null, null);
+  } else {
+    var credit = new Credit();
+
+    credit.getPlatformParameter(function(err, obj) {
+      obj.keyword = options.keyword;
+      var Cookie = obj.Cookie;
+      credit.getSingleCreditHTML(obj, function(err, result) {
+        var companyBasic = result;
+        var options = {
+          uuid: result.uuid,
+          tab: '01',
+          Cookie: Cookie
+        }
+
+        credit.getDisclosureHTML(options, function(err, body) {
+          util.registrationInfos(body, function(registration) {
+            var investorsTable = registration.investorsTable;
+            var self = this;
+            var investorsDetailContainer = [];
+
+            async.each(investorsTable, function(investors, done) {
+              util.handleInvestorDetail(investors, function(investorInfo) {
+                investorsDetailContainer.push(investorInfo);
+                done();
+              })
+            }, function(err) {
+              if (err) {
+                log("handle investors detail error", err);
+                callback(null, {
+                  companyBasic: companyBasic,
+                  registration: registration
+                });
+              } else {
+                log("handle investors detail succeed");
+                callback({
+                  companyBasic: companyBasic,
+                  registration: registration,
+                  investorsDetailContainer: investorsDetailContainer
+                });
+              }
+            })
+          })
+        })
+      })
+    })
+  }
+}
+
+
+
+
+
+
+
 
 
 //---------------------------------------------------
