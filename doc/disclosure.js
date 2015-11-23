@@ -58,7 +58,6 @@ function InfoLists2($, htmlObj) {
 
 
   var valueItemLength = valueInfosLength / propertiesLength;
-  log(propertiesLength, valueInfosLength, valueItemLength)
   var result = [];
   for (var i = 0; i < valueItemLength; i++) {
     var temResult = [];
@@ -95,12 +94,27 @@ function InfoLists2($, htmlObj) {
 fs.readFile('./company5.html', function(err, data) {
   var html = data.toString();
   var $ = cheerio.load(html);
-
+  // 企业年报
   var annualReportObj = $("div[rel='layout-02_01']").first();
-
   var annualReport = InfoLists2($, annualReportObj);
+  // 行政许可信息
+  var adminLicenseObj = $("div[rel='layout-02_02']").first();
+  var adminLicenseTable = InfoLists2($, adminLicenseObj);
+  // 知识产权出质登记信息
+  var intellectualPropertyObj = $("div[rel='layout-02_03']").first();
+  var intellecturlTable = InfoLists2($, intellectualPropertyObj)
+    // 行政处罚信息
+  var adminPenaltiesObj = $("div[rel='layout-02_05']").first();
+  var adminPenalties = InfoLists2($, adminPenaltiesObj);
 
-  var 
+  var companyDisclosure = {
+    annualReport: annualReport,
+    adminLicenseTable: adminLicenseTable,
+    intellecturlTable: intellecturlTable,
+    adminPenalties: adminPenalties
+  }
+
+  log(companyDisclosure)
 
 
 
