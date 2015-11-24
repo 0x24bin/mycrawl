@@ -72,5 +72,20 @@ crawler.searchRegistrationStatus(registrationStatusOption, keyword, function(err
 
 ```
 
+#### getRegistrationDisclosure
+registration  disclosure information
+
+```
+  var options = {
+  keyword: '310114000233023' // 统一社会信用代码/注册号
+}
+
+```
+
+#### getCompanyDisclosure 
+
+This is the same as getRegistrationDisclosure api , but this is for company disclosure information
+
+
 
 ### License: MIT

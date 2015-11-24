@@ -1,0 +1,875 @@
+
+
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    
+
+
+
+
+
+<!-- 其他部门公示信息行政许可查询类型 --><!-- 其他部门公示信息行政处罚查询类型 -->
+
+
+<script type="text/javascript">
+  // 常量类
+  var constants = constants || {};
+  
+  // 是或否
+  constants.yes = "1";
+  constants.no = "0";
+    
+  // 即时公示已公示修改：业务类型
+  constants.othAppSubType = {
+    alt: "1",
+    repeal: "2",
+    revoke: "3",
+    other: "4"
+  };
+  
+  // 出资方式字典
+  constants.dicInvtType = new Object();
+  
+    constants.dicInvtType["1"] = "货币";
+  
+    constants.dicInvtType["2"] = "实物";
+  
+    constants.dicInvtType["3"] = "知识产权";
+  
+    constants.dicInvtType["4"] = "债权";
+  
+    constants.dicInvtType["5"] = "高新技术成果";
+  
+    constants.dicInvtType["6"] = "土地使用权";
+  
+    constants.dicInvtType["7"] = "股权";
+  
+    constants.dicInvtType["8"] = "劳务";
+  
+    constants.dicInvtType["9"] = "其他";
+  
+  
+  // 公示状态
+  constants.dicNoticeState = new Object();
+  
+    constants.dicNoticeState["1"] = "已公示";
+  
+    constants.dicNoticeState["2"] = "未公示";
+  
+    constants.dicNoticeState["3"] = "未公示";
+  
+  
+  // 登记信息状态字典
+  constants.dicRegStatus = new Object();
+  
+    constants.dicRegStatus["1"] = "有效";
+  
+    constants.dicRegStatus["2"] = "无效";
+  
+
+  // 配置常量
+  constants.config = {
+    // 默认错误描述
+    "err.default": "无法完成操作，请刷新页面后重试！"
+  };
+  
+  // 全局变量类
+  var global = global || {};
+  
+  // 当前服务器根路径
+  global.base = "https://www.sgs.gov.cn/notice/";
+  
+  // 当前服务器时间
+  global.current = '2015-11-24';
+  
+  // 当前年份
+  global.year = '2015';
+  
+  // 当前令牌对象
+  global.token = {
+    name: "session.token",
+    code: "3ea829a7-fb53-42ec-a164-d78fe21d0ab3",
+    data: {
+      "session.token": "3ea829a7-fb53-42ec-a164-d78fe21d0ab3"
+    }
+  };
+</script>
+<script type="text/javascript" src="https://www.sgs.gov.cn/notice/js/datepicker/WdatePicker.js?t=20150818-01"></script>
+<base href="https://www.sgs.gov.cn/notice/" />
+<link type="text/css" rel="stylesheet" href="js/ui/skin/smoothness/jquery-ui.css?t=20150813-01" />
+<link type="text/css" rel="stylesheet" href="css/base.css?t=20150813-01" />
+<script type="text/javascript" src="js/jquery.min.js?t=20150818-01"></script>
+<script type="text/javascript" src="js/jquery.bgiframe.js?t=20150818-01"></script>
+<script type="text/javascript" src="js/ui/jquery-ui.min.js?t=20150818-01"></script>
+<script type="text/javascript" src="js/validate/jquery.validate.min.js?t=20150818-01"></script>
+<script type="text/javascript" src="js/validate/validate.common.js?t=20150818-01"></script>
+<script type="text/javascript" src="js/datepicker/WdateInit.js?t=20150818-01"></script>
+<script type="text/javascript" src="js/loading/loading.js?t=20150818-01"></script>
+<script type="text/javascript" src="js/loading/loading.bind.ajax.js?t=20150818-01"></script>
+<script type="text/javascript" src="js/security/md5.min.js?t=20150818-01"></script>
+<script type="text/javascript" src="js/math/BigDecimal-all-last.min.js?t=20150818-01"></script>
+<script type="text/javascript" src="js/common.js?t=20150818-01"></script>
+<script type="text/javascript" src="js/security/captcha.js?t=20150818-01"></script>
+<script type="text/javascript" src="js/user/login.conf.sh.js?t=20150818-01"></script>
+<script type="text/javascript" src="js/user/login.js?t=20150818-01"></script>
+<script type="text/javascript" src="js/page/page.js?t=20150818-01" ></script>
+<script type="text/javascript" src="js/search/search.js?t=20150818-01"></script>
+<script type="text/javascript" src="js/json2.js?t=20150818-01"></script>
+
+<!--[if lt IE 10]>
+<script type="text/javascript" src="js/PIE.js?t=20150818-01"></script>
+<script type="text/javascript" src="js/class.js?t=20150818-01"></script>
+<![endif]-->
+<!--[if lt IE 9]>
+<script type="text/javascript" src="js/html5.js?t=20150818-01"></script>
+<![endif]-->
+<!--[if lt IE 7]>
+<script type="text/javascript" src="js/DD_belatedPNG.js?t=20150818-01"></script> 
+<script type="text/javascript">
+  DD_belatedPNG.fix("img");
+</script> 
+<![endif]-->
+
+<link type="text/css" rel="stylesheet" href="css/notice.css?t=20150813-01" />
+<script type="text/javascript" src="js/page/page.notice.js?t=20150818-01" ></script>
+  
+
+
+
+<title>
+  
+    
+    全国企业信用信息公示系统
+  
+</title>
+    
+    <style type="text/css">
+      .layout .header { background-image:url(images/layout/header-sh.png); } 
+    </style>
+    
+  <script type="text/javascript">
+    // 自适应工作区域高度（通用页面）
+    var autofitCommon = function() {
+    };
+    
+    // 自适应工作区域高度（自适应事件调用）
+    var autofit = autofitCommon;
+    
+    $(function() {
+      // 初始化及页面大小变化时自适应工作区域高度
+      $(window).resize(function() {
+        autofit();
+      }).load(function() {
+        autofit();
+        $(".layout").css("visibility", "visible");
+      });
+    });
+  </script>
+</head>
+<body class="layout">
+  <script type="text/javascript" src="js/loading/loading.bind.js?t=20150818-01"></script>
+
+  <div class="header">
+    
+
+
+
+<ul class="nav">
+  
+    
+    
+      <li rel="nav-01" class="hide"><a href="http://gsxt.saic.gov.cn/">全国首页</a></li>
+      <li rel="nav-02" class="hide"><a href="https://www.sgs.gov.cn/notice/home">地方局首页</a></li>
+    
+  
+  <li rel="nav-06" class="hide"><a href="javascript:" onclick="help();return false;">使用帮助</a></li>
+  <li rel="nav-03" class="hide"><a href="javascript:" onclick="login.clear();return false;">退出</a></li>
+  <li rel="nav-04" class="hide"><a href="https://www.sgs.gov.cn/notice/report/home">返回</a></li>
+  <li rel="nav-05" class="hide"><a href="https://www.sgs.gov.cn/notice/report/home?menu=offline">返回</a></li>
+  
+</ul>
+
+<script type="text/javascript">
+  $(function() {
+    // 预设当前需显示的导航链接
+    var navs = new Array();
+    
+
+    // 初始化导航栏显示
+    toggleNav(navs);
+  });
+  
+  // 切换导航栏链接显示
+  function toggleNav(navs) {
+    // 隐藏所有导航链接
+    $(".nav li[rel]").hide();
+    // 显示预设导航链接
+    for(var i in navs) {
+      $(".nav li[rel='nav-" + navs[i] + "']").show();
+    }
+  }
+  
+  // 下载使用帮助
+  function help() {
+    var iframe = $("iframe#download");
+    
+    if(iframe.size() == 0) {
+      iframe = elem('<iframe src="javascript:" class="hide" id="download"></iframe>').appendTo("body");
+    }
+    
+    iframe.attr("src", "https://www.sgs.gov.cn/notice/download/handbook?name=help.doc");
+  }
+</script>
+  </div>
+  
+  <div class="main">
+    
+
+
+
+
+
+
+
+  
+  
+  
+  
+    
+  
+
+
+<div class="notice">
+  <ul class="title-bar clearfix ">
+    <li>上海东方专利商标代理有限公司</li>
+    <li>统一社会信用代码/注册号：310114000233023          </li>
+    
+    
+  </ul>
+
+  <div class="cont clearfix">
+    
+      
+        
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class="detail-cont">
+      <div class="detail-info">
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            
+            
+              
+
+
+
+
+
+
+
+<table cellspacing="0" cellpadding="0" class="info m-bottom m-top">
+  <col width="20%" /><col width="30%" /><col width="20%" /><col width="30%" />
+  <tr>
+    <th colspan="4" class="red">2014年度年度报告&nbsp;红色为修改过的信息项</th>
+  </tr>
+  <tr>
+    <th colspan="4">企业基本信息</th>
+  </tr>
+  <tr>
+    <th class="right">统一社会信用代码/注册号</th>
+    <td>310114000233023</td>
+    <th class="right">企业名称</th>
+    <td>上海东方专利商标代理有限公司</td>
+  </tr>
+    
+    <tr>    
+      <th class="right" item="04">企业联系电话</th>
+      <td>021-63736818</td>
+      <th class="right" item="05">邮政编码</th>
+      <td>200021</td>
+    </tr>
+    <tr>
+      <th class="right" item="01">企业通信地址</th>
+      <td colspan="3">宁海东路200号1911室</td>
+    </tr>
+    <tr>    
+      <th class="right" item="06">电子邮箱</th>
+      <td>dfsb@dfsb.com.cn</td>
+      
+        
+          <th class="right" item="36">有限责任公司本年度是否发生股东股权转让</th>
+          <td>否</td>
+          
+          
+        
+    </tr>
+    <tr>
+      <th class="right" item="02">企业经营状态</th>
+      <td>开业</td>
+      <th class="right" item="">是否有网站或网点</th>
+      <td>是</td>
+    </tr>
+    
+      
+        <tr>
+          <th class="right" item="08">企业是否有投资信息或购买其他公司股权</th>
+          <td>否</td>
+          <th class="right" item="03">从业人数</th>
+          <td>
+            
+                企业选择不公示
+                
+                      
+            </td>   
+        </tr>
+      
+      
+    
+  
+  
+</table>
+            
+          
+        
+          
+        
+          
+            
+            
+              
+
+
+
+<table cellspacing="0" cellpadding="0" class="info m-bottom m-top">
+  <col width="20%"/><col width="35%"/><col width="45%"/>
+  <tr>
+    <th colspan="3" align="center" item="31">网站或网店信息</th>
+  </tr>
+  <tr>
+    <th>类型</th>
+    <th>名称</th>
+    <th>网址</th>
+  </tr>
+  
+    <tr>
+      <td>网站</td>
+      <td>上海东方专利商标代理有限公司</td>
+      <td>www.orientip.com</td>
+    </tr>
+  
+</table>
+            
+          
+        
+          
+            
+            
+              
+
+
+
+
+<table cellspacing="0" cellpadding="0" class="info m-bottom m-top">
+  <col width="18%" /><col width="13%" /><col width="13%" /><col width="15%" />
+  <col width="13%" /><col width="13%" /><col width="15%" />
+  <tr>
+    <th colspan="7" item="32">股东及出资信息（币种与注册资本一致）</th>
+  </tr>
+  <tr>
+    <th>股东</th>
+    <th>认缴出资额<br />（万元）</th>
+    <th>认缴出资时间</th>
+    <th>认缴出资方式</th>
+    <th>实缴出资额<br />（万元）</th>
+    <th>实缴出资时间</th>
+    <th>实缴出资方式</th>
+  </tr>
+  
+    <tr>
+      <td>陈愉</td>
+      <td>15.500000</td>
+      <td>2010年9月1日</td>
+      <td>货币</td>
+      <td>15.500000</td>
+      <td>2010年9月1日</td>
+      <td>货币</td>
+    </tr>
+  
+    <tr>
+      <td>石英</td>
+      <td>15.500000</td>
+      <td>2010年9月1日</td>
+      <td>货币</td>
+      <td>15.500000</td>
+      <td>2010年9月1日</td>
+      <td>货币</td>
+    </tr>
+  
+    <tr>
+      <td>曹立维</td>
+      <td>15.500000</td>
+      <td>2010年9月1日</td>
+      <td>货币</td>
+      <td>15.500000</td>
+      <td>2010年9月1日</td>
+      <td>货币</td>
+    </tr>
+  
+    <tr>
+      <td>宋子啸</td>
+      <td>3.500000</td>
+      <td>2010年9月1日</td>
+      <td>货币</td>
+      <td>3.500000</td>
+      <td>2010年9月1日</td>
+      <td>货币</td>
+    </tr>
+  
+</table>
+
+            
+          
+        
+          
+            
+            
+              
+
+
+
+<table cellspacing="0" cellpadding="0" class="info m-bottom m-top">
+  <col width="50%"/><col width="50%"/>
+  <tr>
+    <th colspan="2" align="center" item="33">对外投资信息</th>
+  </tr>
+  <tr>
+    <th>投资设立企业或购买股权企业名称</th>
+    <th>统一社会信用代码/注册号</th>
+  </tr>
+  
+</table>
+            
+          
+        
+          
+            
+            
+              
+
+
+
+
+
+<table cellspacing="0" cellpadding="0" class="info m-bottom m-top">
+  <col width="20%"/><col width="30%"/><col width="20%"/><col width="30%"/>
+  <!-- 企业母体 -->
+  
+    <tr>
+      <th colspan="4">企业资产状况信息</th>
+    </tr>
+    <tr>
+      <th class="right" item="22">资产总额</th>
+      <td>
+        
+          企业选择不公示
+          
+        
+      </td>
+      <th class="right" item="28">所有者权益合计</th>
+      <td>
+        
+          企业选择不公示
+          
+        
+      </td>
+    </tr>
+    <tr>
+      <th class="right" item="24">营业总收入</th>
+      <td>
+        
+          企业选择不公示
+          
+        
+      </td>
+      <th class="right" item="25">利润总额</th>
+      <td>
+        
+          企业选择不公示
+          
+        
+      </td>
+    </tr>
+    <tr>
+      <th class="right" item="40">营业总收入中主营业务收入</th>
+      <td>
+        
+          企业选择不公示
+          
+        
+      </td>
+      <th class="right" item="26">净利润</th>
+      <td>
+        
+          企业选择不公示
+          
+        
+      </td>
+    </tr>
+    <tr>
+      <th class="right" item="27">纳税总额</th>
+      <td>
+        
+          企业选择不公示
+          
+        
+      </td>
+      <th class="right" item="23">负债总额</th>
+      <td>
+        
+          企业选择不公示
+          
+        
+      </td>
+    </tr>
+  
+  
+  <!-- 企业分支 -->
+  
+  
+  <!-- 个体 -->
+  
+  
+  <!-- 农专 -->
+  
+</table>
+            
+          
+        
+          
+            
+            
+              
+
+
+
+
+
+<table cellspacing="0" cellpadding="0" class="info m-bottom m-top">
+  <col width="10%"/><col width="10%"/><col width="10%"/><col width="10%"/>
+  <col width="20%"/><col width="10%"/><col width="10%"/><col width="20%"/>
+  <tr>
+    <th colspan="8" align="center" item="39">对外提供保证担保信息</th>
+  </tr>
+  <tr>
+    <th>债权人</th>
+    <th>债务人</th>
+    <th>主债权种类</th>
+    <th>主债权数额</th>
+    <th>履行债务的期限</th>
+    <th>保证的期间</th>
+    <th>保证的方式</th>
+    <th>保证担保的范围</th>
+  </tr>
+  
+</table>
+            
+          
+        
+          
+            
+            
+              
+
+
+
+
+
+<table cellspacing="0" cellpadding="0" class="info m-bottom m-top">
+  <col width="25%" /><col width="25%" /><col width="25%" /><col width="25%" />
+  <tr>
+    <th colspan="4" align="center" item="36">股权变更信息</th>
+  </tr>
+  <tr>
+    <th>股东</th>
+    <th>变更前股权比例</th>
+    <th>变更后股权比例</th>
+    <th>股权变更日期</th>
+  </tr>
+  
+</table>
+            
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </div>
+  
+
+  
+
+  
+
+  
+    <div class="detail-cont">
+      <div class="detail-info">
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+            
+            
+              
+
+
+
+
+<table cellspacing="0" cellpadding="0" class="info m-bottom m-top">
+  <col width="5%"/><col width="20%"/><col width="30%"/><col width="30%"/><col width="15%"/>
+  <tr>
+    <th colspan="5" align="center">修改记录</th>
+  </tr>
+  <tr>
+    <th>序号</th>
+    <th>修改事项</th>
+    <th>修改前</th>
+    <th>修改后</th>
+    <th>修改日期</th>
+  </tr>
+  
+</table>
+            
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+<script type="text/javascript">
+  $(function() {
+    // 当详情页面表格内容为空时，删除表格容器
+    $(".detail-info").each(function() {
+      if ($(this).find("table").size() == 0) {
+        $(this).parent(".detail-cont").remove();
+      }
+    });
+    
+    
+      // 对于年度报告公示信息查看页面，将有修改记录的标题变红
+      
+      
+    
+  });
+</script>
+      
+      
+    
+  </div>
+</div>
+
+<script type="text/javascript">
+  $(function() {
+    // 模拟分页效果
+    $(".page-container").each(function() {
+      var c = $(this);
+      var i = c.parents("table").find(".page-item");
+      var s = c.attr("rel") || 5; // 默认每页5条数据
+      paging.simulate.init({
+        container: c,
+        items: i,
+        size: s
+      });
+    });
+    
+    // 初始化td（收起多余的字）
+    // td中内容需要收起的有格式要求 <td row="2" col="36" class="words">
+    // row为显示的行数，col为显示的列数 
+    $(".words").each(function(){
+      var words = $(this).html();
+      var rowLen = $(this).attr("row");
+      var colLen = $(this).attr("col");
+      cutWords(rowLen,colLen,words,$(this));
+    });
+  });
+  
+  // 截取多余的汉字，并添加“更多”超链接
+  function cutWords(rowLen, colLen, words, $td) {
+    // td中字数
+    var wordsLen = strlen(words);
+    // 如果字数少于要求，则不作任何操作
+    if(wordsLen <= rowLen*colLen) {
+      return false;
+    }
+    // 截取后的内容
+    var shortWords = cutstr(words, rowLen * colLen - 6);
+    // 清除td中内容
+    $td.html("");
+    // 创建截取后字符的span，并添加到td中
+    $(document.createElement("span")).attr("id", "shortWords").html(shortWords + " ").appendTo($td);
+    // 创建“更多”超链接，并添加到td中
+    $(document.createElement("a")).attr("href","javascript:;").attr("id","moreWordId").click(function() {
+      moreWords(this);
+      return false;
+    }).html("更多").appendTo($td);
+    // 创建所有字符span，并添加到td中
+    $(document.createElement("span")).attr("id", "allWords").addClass("hide").html(words + " ").appendTo($td);
+    // 创建“收起更多”超链接，并添加到td中
+    $(document.createElement("a")).attr("href", "javascript:;").attr("id", "hideWordId").click(function() {
+      hideWords(this);
+      return false;
+    }).html("收起更多").appendTo($td).hide();
+  }
+  
+  // 更多
+  function moreWords(a) {
+    // 找到容器td
+    $td = $(a).parents(".words");
+    $td.find("#moreWordId, #shortWords").hide();
+    $td.find("#allWords, #hideWordId").show();
+  }
+  
+  // 收起更多
+  function hideWords(a) {
+    // 找到容器td
+    $td = $(a).parents(".words");
+    $td.find("#shortWords, #moreWordId").show();
+    $td.find("#allWords, #hideWordId").hide();
+  }
+</script>
+  </div>
+  
+  <div class="footer">
+    <p>
+      <span>版权所有：上海市工商行政管理局</span>
+      <span>地址：上海市徐汇区肇嘉浜路301号</span>
+      <span>邮政编码：200032</span>
+    </p>
+    <p>
+      
+      
+      
+      
+        
+          <span>业务咨询电话：021-12315</span>
+          <span>技术支持电话：021-64220000-1002</span>
+        
+        
+      
+      
+    </p>
+  </div>
+  
+  
+</body>
+</html>
