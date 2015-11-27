@@ -1,6 +1,6 @@
 {
   "name": "mycrawl",
-  "version": "0.1.4",
+  "version": "0.1.7",
   "description": "craw a definite web",
   "main": "index.js",
   "directories": {
@@ -43,13 +43,6 @@
   },
   "homepage": "https://github.com/zunkun/mycrawl#readme",
   "keywords": [
-    "craw",
-    "a",
-    "definite",
-    "website",
-    "about",
-    "company",
-    "credit",
-    "information"
+    "crawl"
   ]
 }

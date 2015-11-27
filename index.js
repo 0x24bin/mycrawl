@@ -327,42 +327,55 @@ Crawler.prototype.getRegistrationDisclosure = function(options, callback) {
         obj.keyword = options.keyword;
         var Cookie = obj.Cookie;
         credit.getSingleCreditHTML(obj, function(err, result) {
-          var companyBasic = result;
-          var options = {
-            uuid: result.uuid,
-            tab: '01',
-            Cookie: Cookie
-          }
+          if (err || !result || !result.hasOwnProperty("uuid")) {
+            log("get credit information failed");
+            callback(null, null);
+          } else {
+            var companyBasic = result;
+            var options = {
+              uuid: result.uuid,
+              tab: '01',
+              Cookie: Cookie
+            }
 
-          credit.getDisclosureHTML(options, function(err, body) {
-            util.registrationInfos(body, function(registration) {
-              var investorsTable = registration.investorsTable;
-              var self = this;
-              var investorsDetailContainer = [];
-
-              async.each(investorsTable, function(investors, done) {
-                util.handleInvestorDetail(investors, function(investorInfo) {
-                  investorsDetailContainer.push(investorInfo);
-                  done();
-                })
-              }, function(err) {
-                if (err) {
-                  log("handle investors detail error", err);
+            credit.getDisclosureHTML(options, function(err, body) {
+              util.registrationInfos(body, function(registration) {
+                if(!registration.hasOwnProperty("investorsTable")) {
+                  log("no investorsTable exists");
                   callback(null, {
-                    companyBasic: companyBasic,
-                    registration: registration
+                    companyBasic: companyBasic
                   });
                 } else {
-                  log("handle investors detail succeed");
-                  callback({
-                    companyBasic: companyBasic,
-                    registration: registration,
-                    investorsDetailContainer: investorsDetailContainer
-                  });
+                  var investorsTable = registration.investorsTable;
+                  var self = this;
+                  var investorsDetailContainer = [];
+
+                  async.each(investorsTable, function(investors, done) {
+                    util.handleInvestorDetail(investors, function(investorInfo) {
+                      investorsDetailContainer.push(investorInfo);
+                      done();
+                    })
+                  }, function(err) {
+                    if (err) {
+                      log("handle investors detail error", err);
+                      callback(null, {
+                        companyBasic: companyBasic,
+                        registration: registration
+                      });
+                    } else {
+                      log("handle investors detail succeed");
+                      callback(null, {
+                        companyBasic: companyBasic,
+                        registration: registration,
+                        investorsDetailContainer: investorsDetailContainer
+                      });
+                    }
+                  })
+                  
                 }
               })
             })
-          })
+          }
         })
       })
     }
@@ -422,7 +435,7 @@ Crawler.prototype.getCompanyDisclosure = function(options, callback) {
                     companyBasic: companyBasic,
                     companyDisclosure: companyDisclosure
                   });
-                } else {        
+                } else {
                   callback(null, {
                     companyBasic: companyBasic,
                     companyDisclosure: companyDisclosure,
