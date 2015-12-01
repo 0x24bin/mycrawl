@@ -12,7 +12,7 @@ function log(info) {
 
 
 
-fs.readFile('./company.html', function(err, data) {
+fs.readFile('./company8.html', function(err, data) {
   var html = data.toString();
 
   var $ = cheerio.load(html);
@@ -132,9 +132,9 @@ fs.readFile('./company.html', function(err, data) {
   var memberObj = $("#memberTable");
   var tds = memberObj.find(".page-item :not('.center')");
   var tdsLength = tds.length;
-
+  log("tdsLength = " + tdsLength)
   var memberTable = [];
-  var memberLength = tdsLength / 2;
+  var memberLength = tdsLength / 3;
 
   for (var i = 0; i < memberLength; i++) {
     var member = [];
@@ -153,6 +153,10 @@ fs.readFile('./company.html', function(err, data) {
     }
     memberTable.push(member)
   }
+
+  log(memberTable)
+
+
 
   var branchObj = $("#branchTable")
 

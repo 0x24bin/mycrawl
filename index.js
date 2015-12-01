@@ -119,8 +119,6 @@ Crawler.prototype.searchCompanyInformation = function(options, keywords, callbac
       } else {
 
         log('succeed get companyLists', number, companyListsOutputs);
-        // callback(null, {numberOfResults: number, companyListsOutputs: companyListsOutputs})
-        // var companyLists = com
         var companyLists = companyListsOutputs;
         async.each(companyLists, function(companyList, done) {
           var companyQueryId = companyList.companyQueryId;
@@ -129,7 +127,24 @@ Crawler.prototype.searchCompanyInformation = function(options, keywords, callbac
               done(err);
             } else {
               util.handleCompanyDetail(companyDetailHtml, function(detailResults) {
-
+                var basicDetail = detailResults.basicDetail;
+                var length = basicDetail.length;
+                var companyId = "";
+                for (var i = 0; i < length; i++) {
+                  var detail = basicDetail[i];
+                  var key = detail.key;
+                  var value = detail.value;
+                  var searchREG = '注册号';
+                  var index = key.search(searchREG);
+                  if (index > -1) {
+                    companyId = value;
+                    break;
+                  } else {
+                    companyId = "";
+                  }
+                };
+                companyList.companyId = companyId;
+                
                 var companyOutput = {
                   company: companyList,
                   basicDetail: detailResults.basicDetail,
@@ -233,6 +248,23 @@ Crawler.prototype.getMoreRegistrations = function(options, keywords, allpageNo, 
               done(err);
             } else {
               util.handleCompanyDetail(companyDetailHtml, function(detailResults) {
+                var basicDetail = detailResults.basicDetail;
+                var length = basicDetail.length;
+                var companyId = "";
+                for (var i = 0; i < length; i++) {
+                  var detail = basicDetail[i];
+                  var key = detail.key;
+                  var value = detail.value;
+                  var searchREG = '注册号';
+                  var index = key.search(searchREG);
+                  if (index > -1) {
+                    companyId = value;
+                    break;
+                  } else {
+                    companyId = "";
+                  }
+                };
+                companyList.companyId = companyId;
 
                 var companyOutput = {
                   company: companyList,
@@ -327,6 +359,7 @@ Crawler.prototype.getRegistrationDisclosure = function(options, callback) {
         obj.keyword = options.keyword;
         var Cookie = obj.Cookie;
         credit.getSingleCreditHTML(obj, function(err, result) {
+          console.log(result)
           if (err || !result || !result.hasOwnProperty("uuid")) {
             log("get credit information failed");
             callback(null, null);
@@ -340,19 +373,26 @@ Crawler.prototype.getRegistrationDisclosure = function(options, callback) {
 
             credit.getDisclosureHTML(options, function(err, body) {
               util.registrationInfos(body, function(registration) {
+                
                 if(!registration.hasOwnProperty("investorsTable")) {
                   log("no investorsTable exists");
                   callback(null, {
-                    companyBasic: companyBasic
+                    companyBasic: companyBasic,
+                    registration: registration
                   });
                 } else {
                   var investorsTable = registration.investorsTable;
+
                   var self = this;
                   var investorsDetailContainer = [];
 
                   async.each(investorsTable, function(investors, done) {
+
                     util.handleInvestorDetail(investors, function(investorInfo) {
-                      investorsDetailContainer.push(investorInfo);
+                      if(investorInfo !== null && investorInfo !== {}) {
+                        investorsDetailContainer.push(investorInfo);
+                      } 
+                      console.log(typeof investorInfo, investorInfo, 5555, investorInfo instanceof Array)
                       done();
                     })
                   }, function(err) {
@@ -429,7 +469,6 @@ Crawler.prototype.getCompanyDisclosure = function(options, callback) {
                 })
               }, function(err) {
                 if (err) {
-                  log(1)
                   log("get annualReport detail error");
                   callback(err, {
                     companyBasic: companyBasic,
