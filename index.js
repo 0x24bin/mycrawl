@@ -134,7 +134,7 @@ Crawler.prototype.searchCompanyInformation = function(options, keywords, callbac
                   var detail = basicDetail[i];
                   var key = detail.key;
                   var value = detail.value;
-                  var searchREG = '注册号';
+                  var searchREG = /注册号|字号/;
                   var index = key.search(searchREG);
                   if (index > -1) {
                     companyId = value;
