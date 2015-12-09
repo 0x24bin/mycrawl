@@ -1,6 +1,6 @@
 {
   "name": "mycrawl",
-  "version": "0.1.12",
+  "version": "0.1.15",
   "description": "craw a definite web",
   "main": "index.js",
   "directories": {

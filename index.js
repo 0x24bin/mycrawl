@@ -118,7 +118,7 @@ Crawler.prototype.searchCompanyInformation = function(options, keywords, callbac
         });
       } else {
 
-        log('succeed get companyLists', number, companyListsOutputs);
+        log('succeed get companyLists');
         var companyLists = companyListsOutputs;
         async.each(companyLists, function(companyList, done) {
           var companyQueryId = companyList.companyQueryId;
@@ -144,7 +144,7 @@ Crawler.prototype.searchCompanyInformation = function(options, keywords, callbac
                   }
                 };
                 companyList.companyId = companyId;
-                
+
                 var companyOutput = {
                   company: companyList,
                   basicDetail: detailResults.basicDetail,
@@ -195,11 +195,6 @@ Crawler.prototype.getMoreRegistrations = function(options, keywords, allpageNo, 
   var keywordsResults = handleKeywords(keywords, zone);
   var flag = keywordsResults.flag;
   var searchKeywords = keywordsResults.searchKeywords;
-
-  log(zone, keywords, keywordsResults, searchKeywords)
-
-  // var companyInformation ;
-
   if (flag) {
     // var self = this;
     var registration = new Registration(options);
@@ -221,9 +216,8 @@ Crawler.prototype.getMoreRegistrations = function(options, keywords, allpageNo, 
 
             companyLists.forEach(function(companyList) {
 
-                companyListsOutputs.push(companyList);
-              })
-              // log(companyLists)
+              companyListsOutputs.push(companyList);
+            })
             done();
           })
         }
@@ -311,8 +305,6 @@ Crawler.prototype.getMoreRegistrations = function(options, keywords, allpageNo, 
 
 
 Crawler.prototype.searchCompanyNameStatus = function(options, keywords, callback) {
-
-  log(options, keywords)
   keywords = keywords || "";
   var companyName = new CompanyName(options);
 
@@ -330,8 +322,6 @@ Crawler.prototype.searchCompanyNameStatus = function(options, keywords, callback
 //---------------------------------------------------
 
 Crawler.prototype.searchRegistrationStatus = function(options, keywords, callback) {
-
-  log(options, keywords)
   var registrationFeedback = new RegistrationFeedback(options);
 
   registrationFeedback.getRegistrationStatus(keywords, function(err, body) {
@@ -359,7 +349,7 @@ Crawler.prototype.getRegistrationDisclosure = function(options, callback) {
         obj.keyword = options.keyword;
         var Cookie = obj.Cookie;
         credit.getSingleCreditHTML(obj, function(err, result) {
-          console.log(result)
+
           if (err || !result || !result.hasOwnProperty("uuid")) {
             log("get credit information failed");
             callback(null, null);
@@ -372,48 +362,57 @@ Crawler.prototype.getRegistrationDisclosure = function(options, callback) {
             }
 
             credit.getDisclosureHTML(options, function(err, body) {
-              util.registrationInfos(body, function(registration) {
-                
-                if(!registration.hasOwnProperty("investorsTable")) {
-                  log("no investorsTable exists");
+              if (body === null) {
+                callback(null, null);
+              } else {
+                util.registrationInfos(body, function(registration) {
                   callback(null, {
                     companyBasic: companyBasic,
                     registration: registration
                   });
-                } else {
-                  var investorsTable = registration.investorsTable;
+                  // 获取 股东的详细信息，下面代码可用，但是会影响该模块效率
+                  // if(!registration.hasOwnProperty("investorsTable")) {
+                  //   log("no investorsTable exists");
+                  //   callback(null, {
+                  //     companyBasic: companyBasic,
+                  //     registration: registration
+                  //   });
+                  // } else {
+                  //   var investorsTable = registration.investorsTable;
 
-                  var self = this;
-                  var investorsDetailContainer = [];
+                  //   var self = this;
+                  //   var investorsDetailContainer = [];
 
-                  async.each(investorsTable, function(investors, done) {
+                  //   async.each(investorsTable, function(investors, done) {
 
-                    util.handleInvestorDetail(investors, function(investorInfo) {
-                      if(investorInfo !== null && investorInfo !== {}) {
-                        investorsDetailContainer.push(investorInfo);
-                      } 
-                      console.log(typeof investorInfo, investorInfo, 5555, investorInfo instanceof Array)
-                      done();
-                    })
-                  }, function(err) {
-                    if (err) {
-                      log("handle investors detail error", err);
-                      callback(null, {
-                        companyBasic: companyBasic,
-                        registration: registration
-                      });
-                    } else {
-                      log("handle investors detail succeed");
-                      callback(null, {
-                        companyBasic: companyBasic,
-                        registration: registration,
-                        investorsDetailContainer: investorsDetailContainer
-                      });
-                    }
-                  })
-                  
-                }
-              })
+                  //     util.handleInvestorDetail(investors, function(investorInfo) {
+                  //       if(investorInfo !== null && investorInfo !== {}) {
+                  //         investorsDetailContainer.push(investorInfo);
+                  //       } 
+                  //       console.log(typeof investorInfo, investorInfo, 5555, investorInfo instanceof Array)
+                  //       done();
+                  //     })
+                  //   }, function(err) {
+                  //     if (err) {
+                  //       log("handle investors detail error", err);
+                  //       callback(null, {
+                  //         companyBasic: companyBasic,
+                  //         registration: registration
+                  //       });
+                  //     } else {
+                  //       log("handle investors detail succeed");
+                  //       callback(null, {
+                  //         companyBasic: companyBasic,
+                  //         registration: registration,
+                  //         investorsDetailContainer: investorsDetailContainer
+                  //       });
+                  //     }
+                  //   })
+
+                  // }
+                })
+
+              }
             })
           }
         })
