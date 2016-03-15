@@ -1,6 +1,5 @@
 mycrawl
 ----------
-
 Developed for [yiqicha.net](http://www.yiqicha.net)  to crawl compamny registration information in Shanghai that is based on the website of `http://www.sgs.gov.cn/shaic/`. Any question is welcomed, contract `zunkun.liu@kyl.biz`
 
 This crawler can get company registration information , company certifaction process information.You should provide search parameters to crawler when use this module.

@@ -13,7 +13,7 @@ var async = require('async');
 //---------------------------------------------------
 
 function log(info) {
-  console.log('------------------------------------------------------------')
+  console.log('-------------------------------------------------')
   var len = arguments.length;
   for (var i = 0; i < len; i++) {
     console.log(arguments[i]);
@@ -188,7 +188,71 @@ Crawler.prototype.searchCompanyInformation = function(options, keywords, callbac
 }
 
 //---------------------------------------------------
-// Get more registrations with pageno
+Crawler.prototype.searchCompanyLists = function(options, keywords, callback) {
+    var zone = '上海';
+    var keywordsResults = handleKeywords(keywords, zone);
+    var flag = keywordsResults.flag;
+    var searchKeywords = keywordsResults.searchKeywords;
+
+    log(zone, keywords, keywordsResults, searchKeywords)
+    if (flag) {
+      // var self = this;
+      var registration = new Registration(options);
+      var detailResultsOutputs = [];
+      var companyListsOutputs = [];
+      var number = 0;
+      var allpageNo = 0;
+      async.each(searchKeywords, function(searchKeyword, done) {
+        registration.getRegistrationLists(searchKeyword, function(err, body) {
+          if (err) {
+            log('error: ', err);
+            done(err);
+          } else {
+            log(body)
+            util.handleCompanyLists(body, function(companyResults) {
+              var companyLists = companyResults.companyLists;
+              var numberOfResults = companyResults.numberOfResults;
+
+              allpageNo += parseInt(companyResults.allpageNo);
+
+              number += parseInt(numberOfResults);
+
+              companyLists.forEach(function(companyList) {
+
+                  companyListsOutputs.push(companyList);
+                })
+                // log(companyLists)
+              done();
+            })
+          }
+        })
+      }, function(err) {
+        if (err) {
+          log(err);
+          callback(err, {
+            allpageNo: 0,
+            numberOfResults: 0,
+            detailResultsOutputs: null
+          });
+        } else {
+          callback(null, {
+            allpageNo: allpageNo,
+            numberOfResults: number,
+            detailResultsOutputs: companyListsOutputs
+          })
+        }
+      });
+    } else {
+      log("keywords wrong")
+      callback(null, {
+        allpageNo: 0,
+        numberOfResults: 0,
+        detailResultsOutputs: null
+      });
+    }
+  }
+  //---------------------------------------------------
+  // Get more registrations with pageno
 
 Crawler.prototype.getMoreRegistrations = function(options, keywords, allpageNo, pageNo, callback) {
   var zone = '上海';
@@ -354,6 +418,8 @@ Crawler.prototype.getRegistrationDisclosure = function(options, callback) {
             log("get credit information failed");
             callback(null, null);
           } else {
+            var companyId = result.companyId;
+            var companyName = result.companyName;
             var companyBasic = result;
             var options = {
               uuid: result.uuid,
@@ -367,6 +433,8 @@ Crawler.prototype.getRegistrationDisclosure = function(options, callback) {
               } else {
                 util.registrationInfos(body, function(registration) {
                   callback(null, {
+                    companyId: companyId,
+                    companyName: companyName,
                     companyBasic: companyBasic,
                     registration: registration
                   });
